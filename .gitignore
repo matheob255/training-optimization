@@ -1,0 +1,31 @@
+# Sensitive data - NEVER commit
+.env
+config.json
+credentials.py
+
+# Raw Garmin data - keep private
+data/raw/*
+data/processed/*
+*.fit
+*.tcx
+*.csv
+
+# Python environment
+venv/
+env/
+__pycache__/
+*.pyc
+.Python
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Large model files
+models/*.pkl
+models/*.h5
+models/*.joblib
+
+# OS files
+.DS_Store
+Thumbs.db
