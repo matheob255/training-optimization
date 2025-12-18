@@ -7,9 +7,11 @@ from garminconnect import Garmin
 from datetime import datetime, timedelta
 import time
 
+
 # Load credentials
 with open('config.json', 'r') as f:
     config = json.load(f)
+
 
 def connect_garmin():
     """Authenticate with Garmin Connect"""
@@ -22,7 +24,8 @@ def connect_garmin():
         print(f"✗ Connection failed: {e}")
         return None
 
-def get_activities(client, num_activities=100):
+
+def get_activities(client, num_activities=365):
     """Download recent activities"""
     try:
         activities = client.get_activities(0, num_activities)
@@ -44,13 +47,19 @@ def get_activities(client, num_activities=100):
         print(f"✗ Failed to get activities: {e}")
         return None
 
+
 def get_daily_health(client, start_date, end_date):
     """Get health metrics for a date range"""
     health_data = []
     current_date = start_date
     
+    total_days = (end_date - start_date).days + 1
+    print(f"Fetching health data for {total_days} days...")
+    
+    day_count = 0
     while current_date <= end_date:
         date_str = current_date.strftime('%Y-%m-%d')
+        day_count += 1
         
         try:
             # Get various health metrics
@@ -97,7 +106,10 @@ def get_daily_health(client, start_date, end_date):
                 pass
             
             health_data.append(daily_stats)
-            print(f"✓ Health data for {date_str}")
+            
+            # Progress indicator
+            if day_count % 10 == 0:
+                print(f"✓ Progress: {day_count}/{total_days} days ({day_count/total_days*100:.0f}%)")
             
         except Exception as e:
             print(f"✗ Failed for {date_str}: {e}")
@@ -107,13 +119,15 @@ def get_daily_health(client, start_date, end_date):
     
     return pd.DataFrame(health_data)
 
+
 if __name__ == "__main__":
     # Connect
     client = connect_garmin()
     
     if client:
         print("\n=== Collecting Activities ===")
-        activities_df = get_activities(client, 100)
+        # CHANGED: Fetch 365 activities instead of 100
+        activities_df = get_activities(client, 365)
         
         if activities_df is not None:
             activities_df.to_csv('data/raw/activities.csv', index=False)
@@ -123,10 +137,11 @@ if __name__ == "__main__":
             print(activities_df[['activityName', 'distance', 'duration', 'averageHR']].head(10))
         
         print("\n=== Collecting Health Data ===")
-        # Get last 30 days of health data
+        # CHANGED: Get last 180 days (6 months) of health data instead of 30
         end_date = datetime.now().date()
-        start_date = end_date - timedelta(days=30)
+        start_date = end_date - timedelta(days=180)
         
+        print(f"Fetching health data from {start_date} to {end_date}")
         health_df = get_daily_health(client, start_date, end_date)
         
         if not health_df.empty:
@@ -134,3 +149,10 @@ if __name__ == "__main__":
             print(f"\n✓ Saved {len(health_df)} days of health data to data/raw/health_metrics.csv")
             print("\nRecent health metrics:")
             print(health_df.tail(10))
+            
+            # Show data quality summary
+            print("\n=== Data Quality Summary ===")
+            print(f"HRV data: {health_df['hrv_rmssd'].notna().sum()} days")
+            print(f"Sleep data: {health_df['sleep_hours'].notna().sum()} days")
+            print(f"Resting HR data: {health_df['resting_hr'].notna().sum()} days")
+            print(f"Stress data: {health_df['stress_avg'].notna().sum()} days")
