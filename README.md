@@ -47,8 +47,8 @@ Analyze your training load, predict injury risk, and optimize your race preparat
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/matheob255/training-simulator.git
-cd training-simulator
+git clone https://github.com/matheob255/training-optimization.git
+cd training-optimization
 ```
 
 
