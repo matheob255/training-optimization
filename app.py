@@ -269,7 +269,7 @@ with tab1:
             
             # Data preview
             with st.expander("👀 Preview Activities Data", expanded=True):
-                st.dataframe(activities_df.head(10), use_container_width=True)
+                st.dataframe(activities_df.head(10), width="stretch")
                 
                 # Column mapping helper
                 st.markdown("**🔧 Column Mapping:**")
@@ -327,7 +327,7 @@ with tab1:
                     )
             
             # Process uploaded data
-            if st.button("✅ Process & Import Activities", type="primary", use_container_width=True):
+            if st.button("✅ Process & Import Activities", type="primary", width="stretch"):
                 with st.spinner("Processing uploaded data..."):
                     try:
                         # Rename columns
@@ -384,9 +384,9 @@ with tab1:
             st.success(f"✅ Loaded {len(health_df)} days of health data!")
             
             with st.expander("👀 Preview Health Data"):
-                st.dataframe(health_df.head(10), use_container_width=True)
+                st.dataframe(health_df.head(10), width="stretch")
             
-            if st.button("✅ Import Health Metrics", type="secondary", use_container_width=True):
+            if st.button("✅ Import Health Metrics", type="secondary", width="stretch"):
                 import os
                 os.makedirs('data/raw', exist_ok=True)
                 health_df.to_csv('data/raw/health_metrics.csv', index=False)
@@ -438,7 +438,7 @@ with tab1:
             
             st.caption(f"⏱️ Estimated time: ~{collect_days * 0.5 / 60:.0f} minutes")
         
-        if st.button("🔄 Connect & Download Data", type="primary", use_container_width=True):
+        if st.button("🔄 Connect & Download Data", type="primary", width="stretch"):
             if not garmin_email or not garmin_password:
                 st.error("❌ Please enter your Garmin credentials")
             else:
@@ -597,7 +597,7 @@ with tab1:
         with col4:
             entry_hr = st.number_input("Avg HR (bpm)", min_value=60, max_value=220, value=150, step=1)
         
-        if st.button("➕ Add Activity", use_container_width=True):
+        if st.button("➕ Add Activity", width="stretch"):
             st.session_state.manual_entries.append({
                 'date': entry_date.strftime('%Y-%m-%d'),
                 'distance': entry_distance,
@@ -620,12 +620,12 @@ with tab1:
             display_df = display_df[['date', 'distance', 'duration_min', 'averageHR']]
             display_df.columns = ['Date', 'Distance (km)', 'Duration (min)', 'Avg HR']
             
-            st.dataframe(display_df, use_container_width=True, hide_index=True)
+            st.dataframe(display_df, width="stretch", hide_index=True)
             
             col1, col2 = st.columns(2)
             
             with col1:
-                if st.button("💾 Save All Entries", type="primary", use_container_width=True):
+                if st.button("💾 Save All Entries", type="primary", width="stretch"):
                     import os
                     os.makedirs('data/raw', exist_ok=True)
                     entries_df.to_csv('data/raw/activities.csv', index=False)
@@ -633,7 +633,7 @@ with tab1:
                     st.success("✅ Saved to activities.csv! Go to Settings tab to run preprocessing.")
             
             with col2:
-                if st.button("🗑️ Clear All", use_container_width=True):
+                if st.button("🗑️ Clear All", width="stretch"):
                     st.session_state.manual_entries = []
                     st.rerun()
         else:
@@ -721,7 +721,7 @@ with tab1:
                     height=350
                 )
                 
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width="stretch")
         except Exception as e:
             st.warning(f"Could not create timeline chart: {e}")
         
@@ -870,7 +870,7 @@ with tab2:
         # Volume trend chart
         fig_volume = analyzer.plot_volume_trend(filtered_df)
         if fig_volume:
-            st.plotly_chart(fig_volume, use_container_width=True)
+            st.plotly_chart(fig_volume, width="stretch")
         
         # Intensity Distribution
         st.subheader("⚡ Intensity Distribution")
@@ -886,7 +886,7 @@ with tab2:
         
         with col2:
             fig_zones = analyzer.plot_intensity_distribution(zones)
-            st.plotly_chart(fig_zones, use_container_width=True)
+            st.plotly_chart(fig_zones, width="stretch")
         
         # Physiological Trends
         st.subheader("💪 Health & Recovery Metrics")
@@ -919,18 +919,18 @@ with tab2:
         if 'hrv_rmssd' in filtered_df.columns:
             fig_hrv = analyzer.plot_hrv_trend(filtered_df)
             if fig_hrv:
-                st.plotly_chart(fig_hrv, use_container_width=True)
+                st.plotly_chart(fig_hrv, width="stretch")
         
         # Combined health metrics
         fig_health = analyzer.plot_combined_health_metrics(filtered_df)
         if fig_health:
-            st.plotly_chart(fig_health, use_container_width=True)
+            st.plotly_chart(fig_health, width="stretch")
         
         # Raw Data Table
         with st.expander("📋 View Raw Data"):
             st.dataframe(
                 filtered_df.sort_values('date', ascending=False).head(50),
-                use_container_width=True,
+                width="stretch",
                 height=400
             )
             
@@ -1456,7 +1456,7 @@ with tab3:
     
     st.markdown("---")
     
-    if st.button("🚀 Generate Intelligent Training Plan", type="primary", use_container_width=True):
+    if st.button("🚀 Generate Intelligent Training Plan", type="primary", width="stretch"):
         with st.spinner("🧠 AI is creating your personalized plan..."):
             
             # Generate plan based on all inputs
@@ -1782,7 +1782,7 @@ with tab4:
             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
         )
         
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
         
         # ================================================================
         # INTENSITY DISTRIBUTION OVERVIEW
@@ -1840,7 +1840,7 @@ with tab4:
                 showlegend=False
             )
             
-            st.plotly_chart(fig_intensity, use_container_width=True)
+            st.plotly_chart(fig_intensity, width="stretch")
         
         # ================================================================
         # WEEKLY BREAKDOWN WITH AI COACHING
@@ -1909,7 +1909,7 @@ with tab4:
                             'Purpose': 'VO2max, speed'
                         }])
                         
-                        st.dataframe(intensity_df, use_container_width=True, hide_index=True)
+                        st.dataframe(intensity_df, width="stretch", hide_index=True)
                     
                     # Session structure example
                     st.markdown("**🗓️ Example Weekly Structure:**")
@@ -2101,7 +2101,7 @@ with tab4:
             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
         )
         
-        st.plotly_chart(fig_progress, use_container_width=True)
+        st.plotly_chart(fig_progress, width="stretch")
         
         # ================================================================
         # SUCCESS INDICATORS (BEYOND RACE TIME)
@@ -2299,7 +2299,7 @@ with tab4:
                 data=csv,
                 file_name=f"training_plan_{datetime.now().strftime('%Y%m%d')}.csv",
                 mime="text/csv",
-                use_container_width=True
+                width="stretch"
             )
         
         with col2:
@@ -2343,14 +2343,14 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}
                 data=summary_text,
                 file_name=f"plan_summary_{datetime.now().strftime('%Y%m%d')}.txt",
                 mime="text/plain",
-                use_container_width=True
+                width="stretch"
             )
         
         with col3:
             # Calendar export (ICS format - future enhancement)
             st.button(
                 "📅 Export to Calendar",
-                use_container_width=True,
+                width="stretch",
                 disabled=True,
                 help="Coming soon: Add workouts to Google Calendar/Apple Calendar"
             )
@@ -2716,7 +2716,7 @@ with tab5:
             # Pacing by quarters
             pacing_df = pd.DataFrame(pacing['quarters'])
             
-            st.dataframe(pacing_df, use_container_width=True, hide_index=True)
+            st.dataframe(pacing_df, width="stretch", hide_index=True)
             
             # Nutrition strategy
             st.markdown("---")
@@ -2887,7 +2887,7 @@ with tab5:
                 
                 # Distribution chart
                 fig_mc = optimizer.plot_monte_carlo_results(mc)
-                st.plotly_chart(fig_mc, use_container_width=True)
+                st.plotly_chart(fig_mc, width="stretch")
                 
                 # Recommendations
                 st.markdown("---")
@@ -2991,7 +2991,7 @@ with tab5:
                 height=400
             )
             
-            st.plotly_chart(fig_perf, use_container_width=True)
+            st.plotly_chart(fig_perf, width="stretch")
             
             # Best race windows
             st.markdown("---")
@@ -3034,7 +3034,7 @@ with tab5:
             
             display_df = perf_df[['week', 'Time', 'Pace (min/km)', 'Volume (km)', 'Fitness (%)']].rename(columns={'week': 'Week'})
             
-            st.dataframe(display_df, use_container_width=True, hide_index=True, height=400)
+            st.dataframe(display_df, width="stretch", hide_index=True, height=400)
     
     # ====================================================================
     # MODE C: MULTIPLE RACE SCENARIOS
@@ -3127,7 +3127,7 @@ with tab5:
                     })
                 
                 comparison_df = pd.DataFrame(comparison_data)
-                st.dataframe(comparison_df, use_container_width=True, hide_index=True)
+                st.dataframe(comparison_df, width="stretch", hide_index=True)
                 
                 # Clear scenarios
                 if st.button("🗑️ Clear All Scenarios"):
@@ -3159,7 +3159,7 @@ with tab5:
                     showlegend=False
                 )
                 
-                st.plotly_chart(fig_compare, use_container_width=True)
+                st.plotly_chart(fig_compare, width="stretch")
             
             else:
                 st.info("👆 Add race scenarios above to compare them")
@@ -3187,7 +3187,7 @@ with tab5:
             with col2:
                 st.metric("Total Distance", f"{garmin_df['distance_km'].sum():.0f} km")
             
-            if st.button("🔄 Refresh Garmin Data", use_container_width=True):
+            if st.button("🔄 Refresh Garmin Data", width="stretch"):
                 st.cache_data.clear()
                 st.rerun()
         
