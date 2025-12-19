@@ -5,26 +5,39 @@ import pandas as pd
 import numpy as np
 import joblib
 import json
+import os
 from datetime import datetime, timedelta
 
 class TrainingSimulator:
     """Simulate training plans and predict outcomes"""
     
     def __init__(self):
-        """Load all trained models"""
-        self.recovery_model = joblib.load('models/recovery_classifier.pkl')
-        self.hrv_model = joblib.load('models/hrv_predictor.pkl')
-        self.injury_model = joblib.load('models/injury_risk_classifier.pkl')
+        """Initialize simulator with optional ML models"""
+        self.use_ml_model = False
+        
+        # Try to load models if they exist
+        recovery_path = 'models/recovery_classifier.pkl'
+        hrv_path = 'models/hrv_predictor.pkl'
+        injury_path = 'models/injury_risk_classifier.pkl'
         
         try:
-            self.performance_model = joblib.load('models/performance_predictor.pkl')
-            self.fitness_model = joblib.load('models/fitness_response_predictor.pkl')
-        except:
-            self.performance_model = None
-            self.fitness_model = None
-        
-        with open('models/model_config.json') as f:
-            self.config = json.load(f)[0]
+            if os.path.exists(recovery_path):
+                self.recovery_model = joblib.load(recovery_path)
+                self.hrv_model = joblib.load(hrv_path)
+                self.injury_model = joblib.load(injury_path)
+                self.use_ml_model = True
+                print("✅ Loaded ML models")
+            else:
+                print("ℹ️ ML models not found. Using heuristic-based calculations.")
+                self.recovery_model = None
+                self.hrv_model = None
+                self.injury_model = None
+        except Exception as e:
+            print(f"⚠️ Could not load models: {e}. Using heuristic fallback.")
+            self.recovery_model = None
+            self.hrv_model = None
+            self.injury_model = None
+            self.use_ml_model = False
     
     def simulate_week(self, current_state, weekly_km, intensity_dist, week_num):
         """Simulate one week with BOTH ML predictions AND rule-based checks"""
@@ -43,20 +56,19 @@ class TrainingSimulator:
             hrv_noise = np.random.normal(0, 3)
             state['hrv_rmssd'] = max(40, state.get('hrv_rmssd', 80) + hrv_noise)
             
-            # === ML-BASED PREDICTIONS ===
-            try:
-                X_recovery = pd.DataFrame([{f: state.get(f, 0) for f in self.config['recovery_features']}])
-                ready = self.recovery_model.predict(X_recovery)[0]
-                ready_proba = self.recovery_model.predict_proba(X_recovery)[0][1]
-            except:
-                ready = 1
-                ready_proba = 0.7
-            
-            try:
-                X_injury = pd.DataFrame([{f: state.get(f, 0) for f in self.config['injury_features']}])
-                injury_risk_ml = self.injury_model.predict_proba(X_injury)[0][1]
-            except:
-                injury_risk_ml = 0.1
+            # === HEURISTIC-BASED PREDICTIONS (no ML needed) ===
+            # Readiness based on recovery score and HRV
+            recovery_score = state.get('recovery_score', 0.7)
+            hrv = state.get('hrv_rmssd', 80)
+            hrv_baseline = state.get('hrv_baseline_28d', 85)
+
+            ready_proba = recovery_score * (1 + (hrv - hrv_baseline) / hrv_baseline * 0.5)
+            ready_proba = np.clip(ready_proba, 0, 1)
+            ready = 1 if ready_proba > 0.6 else 0
+
+            # Start with low baseline injury risk
+            injury_risk_ml = 0.05
+
             
             # === RULE-BASED RISK DETECTION (override ML when needed) ===
             acwr = state.get('acwr', 1.0)
@@ -126,13 +138,8 @@ class TrainingSimulator:
             # Update state
             state = self.update_state_after_workout(state, workout_km, day)
             
-            # Predict HRV
-            try:
-                X_hrv = pd.DataFrame([{f: state.get(f, 0) for f in self.config['hrv_features']}])
-                predicted_hrv = self.hrv_model.predict(X_hrv)[0]
-                state['hrv_rmssd'] = predicted_hrv
-            except:
-                pass
+            # HRV already updated in update_state_after_workout, no ML prediction needed
+            pass
             
             daily_states.append(state.copy())
         
