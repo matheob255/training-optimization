@@ -33,7 +33,6 @@ Analyze your training load, predict injury risk, and optimize your race preparat
 ### 🔐 Secure Data Import
 - **Direct Garmin Connect integration** (credentials never stored)
 - **CSV file upload** (most secure - no credentials needed)
-- **Session token support** (login once, use for 14 days)
 
 ---
 
