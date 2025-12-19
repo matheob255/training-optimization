@@ -10,9 +10,9 @@ from datetime import datetime, timedelta
 import sys
 import time
 sys.path.append('scripts')
-from simulator import TrainingSimulator
-from garmin_analyzer import GarminAnalyzer
-from race_optimizer import RaceOptimizer
+from scripts.simulator import TrainingSimulator
+from scripts.garmin_analyzer import GarminAnalyzer
+from scripts.race_optimizer import RaceOptimizer
 
 # ============================================================================
 # PAGE CONFIGURATION
